@@ -45,6 +45,8 @@ public class MenuBehav : MonoBehaviour
     public Button additionalOptions;
     public Button back2Menu;
 
+    public Text lapCounterText;
+
     void Start()
     {
         Cursor.visible = true;
@@ -70,6 +72,10 @@ public class MenuBehav : MonoBehaviour
         inputField_FilePath.GetComponent<InputField>().text = PlayerPrefs.GetString("FilePath");
 
         inputField_FileName.GetComponent<InputField>().text = PlayerPrefs.GetString("FileName");
+
+        lapCounterText.text = "Laps Completed: " + PlayerPrefs.GetInt("lapCounter");
+        
+        Debug.Log(PlayerPrefs.GetInt("lapCounter"));
 
         //sets the scroll on or off based on previous preferences
         // toggles -----------------------------------------------------------------------------------

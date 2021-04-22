@@ -14,7 +14,8 @@ public class movimento : MonoBehaviour {
 	public double treshold = 25.5;
     public double backtreshold = 0;
     public int position;
-    
+    public int lapCounter = 0;
+
     // public bool hideMouse = false;
     public float speed = 0;
     private float movement = 0;
@@ -25,6 +26,7 @@ public class movimento : MonoBehaviour {
     private bool isLoopCountOn;
     private int didLapComplete = 0;
     private int listCounter = 0;
+    
 
     private float nextActionTime = 0.0f;
     private float currentTime = 0.0f;
@@ -138,7 +140,7 @@ public class movimento : MonoBehaviour {
 
         //targetGameobject.GetComponent<UnityEngine.EventSystems.PhysicsRaycaster>().enabled = false;
 
-
+        PlayerPrefs.SetInt("lapCounter", lapCounter);
     }
 
     // Update is called once per frame
@@ -219,7 +221,8 @@ public class movimento : MonoBehaviour {
             {
                 isCheckpointReached = false;
                 didLapComplete = 1;
-
+                lapCounter = lapCounter + 1;
+                PlayerPrefs.SetInt("lapCounter", lapCounter);
             }
             
         }
