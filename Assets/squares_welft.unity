@@ -4507,7 +4507,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &937293138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5807,6 +5807,7 @@ MonoBehaviour:
   treshold: 25.5
   backtreshold: 0
   position: 0
+  lapCounter: 0
   speed: 0
   period: 0.02
   textDisplay: {fileID: 1898852817}

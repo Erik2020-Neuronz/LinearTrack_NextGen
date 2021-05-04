@@ -16,7 +16,7 @@ public class movimento : MonoBehaviour {
     public int position;
     public int lapCounter = 0;
 
-    // public bool hideMouse = false;
+    
     public float speed = 0;
     private float movement = 0;
     private int previous_position = -1;
@@ -49,13 +49,9 @@ public class movimento : MonoBehaviour {
 
     SerialPort sp; //= new SerialPort("COM6", 9600);
 
-    void CreateText(ref string path) // was just an empty void 2_16_21
+    void CreateText(ref string path)
     {
         //Path of the file
-        //string path = Application.dataPath + "/Log.txt";
-        //string path = "C:/Users/EnglishLab WS3/Documents/TestPathway_Akbar" + "/PleaseWork.txt";
-        //string path = PlayerPrefs.GetString("FilePath", "C:/Users/EnglishLab WS3/Documents/Test2") + "/" + PlayerPrefs.GetString("FileName", "PleaseWork.txt");
-        //this dude was uncommented 2_16_21
         //*** remember *** need "/" not "\"
         //Create File if it doesn't exist
         if (!File.Exists(path))
@@ -63,7 +59,7 @@ public class movimento : MonoBehaviour {
             File.WriteAllText(path, "\n\n");
         }
         //Content of the file
-        //finna boutta create a function that adds a number if a file exists
+        //a function that adds a number to the filename if it already exists
         else
         {
             int num = 1;
@@ -84,15 +80,16 @@ public class movimento : MonoBehaviour {
             File.WriteAllText(path, "\n\n");
         }
 
-
     }
 
 
     // Use this for initialization
     void Start()
     {
-        Cursor.visible = false;
-        //Debug.Log(PlayerPrefs.GetString("FilePath"));
+        Cursor.visible = false; // so the cursor is not flying all around the screen
+
+        //-----------------------------------------------------------------------------
+        // instantiates serial port inputting port# and baud rate
         try
         {
             sp = new SerialPort(PlayerPrefs.GetString("Port"), 9600);
@@ -105,6 +102,9 @@ public class movimento : MonoBehaviour {
         {
             textDisplay.GetComponent<Text>().text = "Disconnected";
         }
+
+        //-----------------------------------------------------------------------------
+        // applies all the menu settings such as gain, sampling frequency, etc. 
 
         speed_factor = PlayerPrefs.GetFloat("Gain", 0.9f);
         period = PlayerPrefs.GetFloat("period", 0.01f);
@@ -131,15 +131,13 @@ public class movimento : MonoBehaviour {
             isLoopCountOn = false;
         }
 
-        
+        //-----------------------------------------------------------------------------
+        // creates a list to be used later 
 
         List<string> myList = new List<string>();
         
         ts = myList;
-        //private myList = new List<string>();
-
-        //targetGameobject.GetComponent<UnityEngine.EventSystems.PhysicsRaycaster>().enabled = false;
-
+        
         PlayerPrefs.SetInt("lapCounter", lapCounter);
     }
 
@@ -152,7 +150,11 @@ public class movimento : MonoBehaviour {
      void FixedUpdate()
     {
 
-        
+
+        //-----------------------------------------------------------------------------
+        // movement script
+        // selects different movement type depending on if the user chose "scroll wheel"
+        // or motion tracker on the menu
 
         if (PlayerPrefs.GetInt("Scroll") == 1 ) //checks if the scroll toggle is active
         {
@@ -171,7 +173,7 @@ public class movimento : MonoBehaviour {
             movement = speed_factor * Mathf.Sign(y) * Mathf.Sqrt(x * x + y * y) * Time.deltaTime;
             speed = movement / Time.deltaTime;
             this.transform.position += new Vector3(0, 0, movement);
-            //CreateText();
+            
         }
         else if(isScrollOn) //function for using the scroll wheel to measure movement
         {
@@ -181,6 +183,11 @@ public class movimento : MonoBehaviour {
             speed = movement / Time.deltaTime;
             this.transform.position += new Vector3(0, 0, movement);
         }
+
+        //-----------------------------------------------------------------------------
+        // script writing to arduino
+        // if arduino is not connected, text on the bottom right will say so
+
         try
         {
             if (sp.IsOpen && Time.time > nextActionTime)
@@ -188,23 +195,22 @@ public class movimento : MonoBehaviour {
                 nextActionTime += period;
                 byte[] data = new byte[] { (byte)position };
                 sp.Write(data, 0, data.Length);
-                //CreateText();
-                //Debug.Log("hello bro");
+                
             }
         }
         catch (System.Exception)
         {
-            textDisplay.GetComponent<Text>().text = "Disconnected";
+            textDisplay.GetComponent<Text>().text = "Disconnected"; // displays text of whether port is connected or not
         }
 
-      
+
+        //-----------------------------------------------------------------------------
+        //checkpoint to help determine if a full lap has been completed or if the camera is oscillating
+        //around the end/beginning of the maze
 
         loopCheck = backtreshold + 0.65 * (treshold - backtreshold);
         loopCheckEnd = backtreshold + 0.75 * (treshold - backtreshold);
-        //a checkpoint
-        //to help determine if a full lap has been completed or if the camera is oscillating
-        //around the end/beginning of the maze
-
+       
 
         if ((this.transform.position.z >= loopCheck) && (this.transform.position.z <= loopCheckEnd))
         {
@@ -226,12 +232,17 @@ public class movimento : MonoBehaviour {
             }
             
         }
-        if (this.transform.position.z < backtreshold)
+        if (this.transform.position.z < backtreshold) 
         {
             this.transform.position += new Vector3(0, 0, (float)flashback);
         }
 
         //-----(position reset if something really goes wrong)---------------
+        // in case the mouse's avatar travels far out of bounds or veers off the linear path
+        // note that the outer z bound is set to 50. The editor currently has the 
+        // the track extend from 0 -> 25.5 arbitrary units in the editor space
+        // While the editor works with these arbitrary units when calculating position, 
+        // this number gets multiplied by 3.9216 before going to arduino or file
         float zz = this.transform.position.z;
         float xx = this.transform.position.x;
         float yy = this.transform.position.y;
@@ -255,13 +266,6 @@ public class movimento : MonoBehaviour {
 
         
 
-
-        
-
-
-
-
-
         if (Input.GetKeyDown("w"))
         {
             print(this.transform.position.z);
@@ -271,13 +275,9 @@ public class movimento : MonoBehaviour {
         previous_position = Mathf.RoundToInt(this.transform.position.z * (float)3.9216);
 
        
-
         //-----------------------------------------------------------------------------
-        // if (sp.IsOpen) you just commented out this line 2_16_21
-        // {  you just commented out this line 2_16_21
-        //string path = PlayerPrefs.GetString("FilePath", "C:/Users/EnglishLab WS3/Documents/Test2") + "/" + PlayerPrefs.GetString("FileName", "PleaseWork.txt");
-        //was initally a simple local variable you recalled 
-
+        // This section compiles the data into a string named "content"
+        // That string is what gets written to file 
         currentTime += Time.deltaTime;
 
             time2Text = currentTime.ToString("F3");
@@ -290,12 +290,12 @@ public class movimento : MonoBehaviour {
 
             content = time2Text + " " + unroundPosText; //+ " " + "\n"
 
-            //print("gg");
+            
         }
         else
         {
             content = time2Text + " " + position;
-            //print("naaaah fam");
+           
         }
          
         if (isLoopCountOn)
@@ -305,41 +305,12 @@ public class movimento : MonoBehaviour {
 
         content = content + " " + "\n";
 
-        // --------------------------------
-        /* bufferedstean thing
-        BufferedStream bufferedStream;
-
-        bufferedStream.Write()
-
-        try 
-        { 
-        
-        }
-        */
-        // --------------------------------
-        // use stream writer and do not close the file until escape, close or crash
-
+        //-----------------------------------------------------------------------------
+        // code where the data gets written to file
+        // stores data in a list until the "listCounter" number of recordings has been made
 
         newPath = "C:/Users/Erik/Documents/TestFolder/streamTester.txt";
-        //File.Open(newPath, FileMode.Create);
-
-
-        /*
-        byte[] datData = Encoding.ASCII.GetBytes(content);
-        //byte[] datData = new byte[] { (byte)content };
-        //Stream stream;
-        StreamWriter writer = new StreamWriter(newPath, true); 
-        //writer.WriteLine(datData);
-        //MemoryStream ms = new MemoryStream();
-        Stream tt = writer.BaseStream { get;};
-        BufferedStream bufferedStream = new BufferedStream(tt);
-        bufferedStream.Write(datData, 0, datData.Length);
-
-        writer.Close();
-        */
-
-
-
+        
         ts.Add(content);
 
 
@@ -348,78 +319,35 @@ public class movimento : MonoBehaviour {
         if(listCounter == 99)
         {
 
-            //string holdingString; //= content;
-            //holdingString = myList[1];
-            //myList[]
-            /*
-            File.AppendAllText(path, ts);
-
-            foreach (string dinosaur in ts)
-            {
-                Debug.Log(dinosaur);
-            }
-            */
-
-            /*
-            using (TextWriter tw = new StreamWriter(path))
-            {
-                foreach (string strData in ts)
-                    tw.WriteLine(strData);
-            }
-            */
-
-            
-            using (FileStream tw = File.Open(path, FileMode.Append)) //
+                   
+            using (FileStream tw = File.Open(path, FileMode.Append)) //appends file referenced in "path"
             {
                 foreach (string strData in ts)
                 {
-                    //File.AppendAllText(path, strData);
+                    
                     byte[] info = new UTF8Encoding(true).GetBytes(strData);
                     tw.Write(info, 0, info.Length);
                 }
             }
-
-
-            /*
-            for (int i = 0; i < 100; i++)
-            {
-                //tsOut = ts.ToString;
-                Debug.Log(ts);
-            }
-            */
-
-            //Debug.Log("Hello my guy!");
+                        
             listCounter = 0;
             ts.Clear();
         }
 
-        //
 
+        //-----------------------------------------------------------------------------
+        //application exit
 
-
-        /*
-        
-        
-        */
-
-        //File.Close();
-        //Add some to text it
-        //File.AppendAllText(path, content); // You just turned this off to test stream writer 3/18/21
-        // }  you just commented out this line 2_16_21
-
-
-
-        // keep this in mind for application ex
         if (Input.GetKeyDown("space"))
         {
             Application.LoadLevel("Pause");
-            //writer.Close();
+            
         }
 
         if (Input.GetKeyDown("escape"))
         {
             Application.LoadLevel("Menu");
-            //writer.Close();
+            
         }
     }
 
