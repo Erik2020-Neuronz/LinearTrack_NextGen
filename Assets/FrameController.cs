@@ -8,7 +8,8 @@ public class FrameController : MonoBehaviour
     void Start()
     {
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 100;
+        Application.targetFrameRate = 100; 
+        
     }
 
     // Update is called once per frame

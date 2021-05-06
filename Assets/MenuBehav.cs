@@ -62,9 +62,9 @@ public class MenuBehav : MonoBehaviour
         //the previous preferences
         //that way they will display and be set next time the program is opened
         //setting default menu values based on previous prefs
-        inputField_Port.GetComponent<InputField>().text = PlayerPrefs.GetString("Port");
-        //Debug.Log(PlayerPrefs.GetString("Port"));
 
+        inputField_Port.GetComponent<InputField>().text = PlayerPrefs.GetString("Port");
+        
         inputField_Gain.GetComponent<InputField>().text = PlayerPrefs.GetFloat("Gain").ToString();
 
         inputField_Period.GetComponent<InputField>().text = PlayerPrefs.GetFloat("Period").ToString();
@@ -77,8 +77,10 @@ public class MenuBehav : MonoBehaviour
         
         Debug.Log(PlayerPrefs.GetInt("lapCounter"));
 
-        //sets the scroll on or off based on previous preferences
+        // sets the scroll on or off based on previous preferences
         // toggles -----------------------------------------------------------------------------------
+        // saved player preferences are activated for the menu
+
         if (PlayerPrefs.GetInt("Scroll") == 1)
         {
             scrollToggle.isOn = true;
@@ -109,9 +111,9 @@ public class MenuBehav : MonoBehaviour
             loopCountToggle.isOn = false;
         }
 
+        // different parts of the menu are instantiated and enabled
 
-
-        Button additOpt = additionalOptions.GetComponent<Button>();
+        Button additOpt = additionalOptions.GetComponent<Button>(); 
         additOpt.onClick.AddListener(TaskOnAdditOptClick);
 
         Button b2menu = back2Menu.GetComponent<Button>();
@@ -123,26 +125,24 @@ public class MenuBehav : MonoBehaviour
         m_CameraTwo.enabled = false;
     }
 
-    void TaskOnAdditOptClick()
+    void TaskOnAdditOptClick() // these functions are used to toggle between the two menus
     {
-        //Debug.Log("You have clicked the button!");
-        //m_MainCamera.transform.position = new Vector3(2510, 314, -993);
         m_CameraTwo.enabled = true;
         m_MainCamera.enabled = false;
     }
 
     void TaskOnB2MenuClick()
     {
-        //Debug.Log("You have clicked the button!");
-        
         m_CameraTwo.enabled = false;
         m_MainCamera.enabled = true;
     }
 
-    public void Maze1() {
+    public void Maze1() { //once the player has hit start, this function activates to begin opening the maze
 
         //player prefs are updated once Maze1 is selected
         //making the current values the new defaults
+        //---------------------------------------------------------------
+        //reads the inputs from the menu
         port = inputPort.GetComponent<Text>().text;
         PlayerPrefs.SetString("Port", port);
 
@@ -160,6 +160,8 @@ public class MenuBehav : MonoBehaviour
 
         mazeChoice = "squares_welft";
         PlayerPrefs.SetString("Maze", mazeChoice);
+        //---------------------------------------------------------------
+        // saves the values input by the user into preferences
 
         if (scrollToggle.isOn == true)
         {
@@ -198,6 +200,6 @@ public class MenuBehav : MonoBehaviour
         }
 
 
-        Application.LoadLevel("Pause");
+        Application.LoadLevel("Pause"); //loads the pause screen
     }
 }

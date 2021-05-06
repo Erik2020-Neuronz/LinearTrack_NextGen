@@ -8,44 +8,58 @@ using System.Text;
 using System.Collections.Generic;
 
 public class movimento : MonoBehaviour {
-    public float speed_factor = 3;
-    public float unroundPosition;
-    public double flashback = 25.5;
-	public double treshold = 25.5;
-    public double backtreshold = 0;
-    public int position;
-    public int lapCounter = 0;
+    //-------------------------------------------------------------------------------
+    // Key concepts to understand
+    // public - the user and other codes can access wheras private is restricted to this file
+    // 0 - 100 unity units is defined as 0 - 25.5 units in the unity editor
+    // this is why the movement section has a multiplier of 3.9216
+    // 
+    // floats in unity have an "f" after them so 0.25 is written 0.25f
+    // 
+    // the object "this" refers to the object which has this script attached
+    // or rather the object who inherets this script as a subclass
+    // used frequently in the movement code for this.position.transform
+    //
+
+
+    public float speed_factor = 3; //what "gain" in the menu translates to. inititalized at 3 just to be non-zero but gets changed in voidstart()
+    public float unroundPosition; 
+    public double flashback = 25.5; // "teleport point" or distance where the lap ends and the loop resets
+	public double treshold = 25.5; // used for 
+    public double backtreshold = 0;// backwards "teleport point" used if the mouse goes backwards throught the beginning of the loop
+    public int position; 
+    public int lapCounter = 0; // number of laps 
 
     
-    public float speed = 0;
-    private float movement = 0;
-    private int previous_position = -1;
-    private bool isCheckpointReached;
-    private bool isScrollOn;
-    private bool isUnroundOn;
-    private bool isLoopCountOn;
-    private int didLapComplete = 0;
-    private int listCounter = 0;
+    public float speed = 0; //not yet used, but a simply distance traveled in one timestep/time
+    private float movement = 0; // used in the movement script as a place holder for distance needed to be travelled
+    private int previous_position = -1; 
+    private bool isCheckpointReached; //boolean to check if the mouse is progressing through the maze or is hovering over the checkpoint
+    private bool isScrollOn; //checks if the scroll wheel option is on (1) or off (0)
+    private bool isUnroundOn; //checks if the unrounded position (text) option is on (1) or off (0)
+    private bool isLoopCountOn; //checks if the loop counter option is on (1) or off (0)
+    private int didLapComplete = 0; // boolean to determine the lap has completed. Used in conditional to update lap counter
+    private int listCounter = 0;//counts the number of data points in the text file list. 
     
 
-    private float nextActionTime = 0.0f;
-    private float currentTime = 0.0f;
-    public float period = 0.01f;
-    private double loopCheck;
-    private double loopCheckEnd;
+    private float nextActionTime = 0.0f; //a secondary check to ensure the arduino does not receive inputs from unity faster than the user defined recording rate
+    private float currentTime = 0.0f; //used for the time component of the text file
+    public float period = 0.01f; //works with "nextActionTime" to set the recording rate
+    private double loopCheck; //the rising edge of the loop check band
+    private double loopCheckEnd;// the falling edge of the loop check band
 
     public GameObject textDisplay;
 
-    string time2Text;
-    private string content;
-    public string path;
-    private string tsOut;
+    string time2Text; //converts time float into a string to be written to file
+    private string content;//the final string that gets written to file
+    public string path; //the text file path
+    private string tsOut;//no longer in use
 
-    private string newPath;
+    private string newPath;//no longer in use
 
-    private StreamWriter writer;
-    private Stream stream;
-    private List<string> ts;
+    private StreamWriter writer;//no longer in use
+    private Stream stream;//no longer in use
+    private List<string> ts; //list that contains all data points before writing to file. Acts as a buffer so unity doesn't have to write to file every frame
 
     SerialPort sp; //= new SerialPort("COM6", 9600);
 
@@ -53,13 +67,14 @@ public class movimento : MonoBehaviour {
     {
         //Path of the file
         //*** remember *** need "/" not "\"
-        //Create File if it doesn't exist
-        if (!File.Exists(path))
+        
+        if (!File.Exists(path)) //Checks if the file already exists
         {
-            File.WriteAllText(path, "\n\n");
+            File.WriteAllText(path, "\n\n"); //creates the file if not
         }
         //Content of the file
         //a function that adds a number to the filename if it already exists
+        //also adds the ".txt" to the end
         else
         {
             int num = 1;
@@ -90,13 +105,14 @@ public class movimento : MonoBehaviour {
 
         //-----------------------------------------------------------------------------
         // instantiates serial port inputting port# and baud rate
+        // serial port is a class which inherits the serial library. This acts as the intermediary between arduino and unity
         try
         {
-            sp = new SerialPort(PlayerPrefs.GetString("Port"), 9600);
-            sp.Open();
-            sp.ReadTimeout = 50;
-            Application.targetFrameRate = -1;
-            textDisplay.GetComponent<Text>().text = "Connected";
+            sp = new SerialPort(PlayerPrefs.GetString("Port"), 9600); //creates new serial port with the user defined Port# and baud rate of 9600 (a baud of 9600 means unity sends 9600 bits/sec to arduino)
+            sp.Open(); //opens the serial port
+            sp.ReadTimeout = 50; //after 50 sec without communication, the port closes
+            Application.targetFrameRate = -1; //keep this in mind
+            textDisplay.GetComponent<Text>().text = "Connected"; 
         }
         catch (System.Exception)
         {
@@ -156,16 +172,16 @@ public class movimento : MonoBehaviour {
         // selects different movement type depending on if the user chose "scroll wheel"
         // or motion tracker on the menu
 
-        if (PlayerPrefs.GetInt("Scroll") == 1 ) //checks if the scroll toggle is active
+        if (PlayerPrefs.GetInt("Scroll") == 1 ) //turns the scroll wheel on
         {
             isScrollOn = true;
         }
-        else if (PlayerPrefs.GetInt("Scroll") == 0)
+        else if (PlayerPrefs.GetInt("Scroll") == 0) //keeps the motion tracker on 
         {
             isScrollOn = false;
         }
 
-        if (!isScrollOn) //remove if statement condition to make mouse motion tracker default
+        if (!isScrollOn) // script for using the motion tracker to measure movement
         {
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
@@ -175,7 +191,7 @@ public class movimento : MonoBehaviour {
             this.transform.position += new Vector3(0, 0, movement);
             
         }
-        else if(isScrollOn) //function for using the scroll wheel to measure movement
+        else if(isScrollOn) //script for using the scroll wheel to measure movement
         {
             float x_scroll = Input.GetAxis("Mouse ScrollWheel");
             position = Mathf.RoundToInt(this.transform.position.z * (float)3.9216);
@@ -190,11 +206,11 @@ public class movimento : MonoBehaviour {
 
         try
         {
-            if (sp.IsOpen && Time.time > nextActionTime)
+            if (sp.IsOpen && Time.time > nextActionTime) //prevents data from sending too fast. action time defined by "period" on the menu
             {
-                nextActionTime += period;
-                byte[] data = new byte[] { (byte)position };
-                sp.Write(data, 0, data.Length);
+                nextActionTime += period; 
+                byte[] data = new byte[] { (byte)position }; // converts unity position to a bit array to be sent throug the serial port "sp"
+                sp.Write(data, 0, data.Length); // actually writing the data to arduino
                 
             }
         }
@@ -205,10 +221,13 @@ public class movimento : MonoBehaviour {
 
 
         //-----------------------------------------------------------------------------
-        //checkpoint to help determine if a full lap has been completed or if the camera is oscillating
-        //around the end/beginning of the maze
+        // checkpoint to help determine if a full lap has been completed or if the camera is oscillating around the end/beginning of the maze
+        // this is designed to editable. The threshold is the end of the maze loop, the back threshold is the beginning of the maze loop
+        // the loopCheck and loopCheckEnd act as a band of detection that the camera must pass first before the reward is primed or ready to fire
+        // this is to ensure that the camera doesn't run past the reward, back up, and run past again to get free rewards without completing the loop
+        // So no matter where the threshold and back threshold are, there will be a checkpoint band some where near the middle
 
-        loopCheck = backtreshold + 0.65 * (treshold - backtreshold);
+        loopCheck = backtreshold + 0.65 * (treshold - backtreshold); 
         loopCheckEnd = backtreshold + 0.75 * (treshold - backtreshold);
        
 
@@ -217,6 +236,11 @@ public class movimento : MonoBehaviour {
             isCheckpointReached = true;
         }
 
+        //-----------------------------------------------------------------------------
+        // the part of the script that teleports the mouse back if it reaches the end of the loop
+        // the end is defined as the threshold
+        // flashback is the amount by which the mouse is "teleported" in the z direction on the next frame
+        // same occurs if the mouse walks backwards past the backthreshold
 
         didLapComplete = 0;
         if (this.transform.position.z > treshold)
@@ -278,11 +302,12 @@ public class movimento : MonoBehaviour {
         //-----------------------------------------------------------------------------
         // This section compiles the data into a string named "content"
         // That string is what gets written to file 
+
         currentTime += Time.deltaTime;
 
             time2Text = currentTime.ToString("F3");
 
-        if (isUnroundOn)
+        if (isUnroundOn) //changes poisiton to unrounded position if selected
         {
             unroundPosition = this.transform.position.z * (float)3.9216;
             string unroundPosText = unroundPosition.ToString("F4");
@@ -291,14 +316,14 @@ public class movimento : MonoBehaviour {
             content = time2Text + " " + unroundPosText; //+ " " + "\n"
 
             
-        }
+        } //integer position if unround is unselected
         else
         {
             content = time2Text + " " + position;
            
         }
          
-        if (isLoopCountOn)
+        if (isLoopCountOn) // adds the loop counter if that is selected
         {
             content = content + " " + didLapComplete;
         }
@@ -309,14 +334,14 @@ public class movimento : MonoBehaviour {
         // code where the data gets written to file
         // stores data in a list until the "listCounter" number of recordings has been made
 
-        newPath = "C:/Users/Erik/Documents/TestFolder/streamTester.txt";
+        newPath = "C:/Users/Erik/Documents/TestFolder/streamTester.txt"; // I think this was only for testing and no longer does anything
         
-        ts.Add(content);
+        ts.Add(content); // remember that the text data is added to a list before being written to file. This list acts as a buffer
 
 
-        listCounter = listCounter + 1;
+        listCounter = listCounter + 1; // counts the number of elements in the list
 
-        if(listCounter == 99)
+        if(listCounter == 99) // once there are 100 elements, they are all written to file in 1 frame
         {
 
                    
@@ -325,8 +350,8 @@ public class movimento : MonoBehaviour {
                 foreach (string strData in ts)
                 {
                     
-                    byte[] info = new UTF8Encoding(true).GetBytes(strData);
-                    tw.Write(info, 0, info.Length);
+                    byte[] info = new UTF8Encoding(true).GetBytes(strData); //converts the string to a bit array
+                    tw.Write(info, 0, info.Length); //the text file is finally written 
                 }
             }
                         
@@ -336,15 +361,15 @@ public class movimento : MonoBehaviour {
 
 
         //-----------------------------------------------------------------------------
-        //application exit
+        //maze exit 
 
-        if (Input.GetKeyDown("space"))
+        if (Input.GetKeyDown("space")) // to go to pause screen
         {
             Application.LoadLevel("Pause");
             
         }
 
-        if (Input.GetKeyDown("escape"))
+        if (Input.GetKeyDown("escape")) // to go to main menu
         {
             Application.LoadLevel("Menu");
             
