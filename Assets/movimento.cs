@@ -380,6 +380,17 @@ public class movimento : MonoBehaviour {
 
         if (Input.GetKeyDown("space")) // to go to pause screen
         {
+            try
+            {
+                int duinoClose = 105;
+                byte[] data = new byte[] { (byte)duinoClose }; // converts unity position to a bit array to be sent throug the serial port "sp"
+                sp.Write(data, 0, data.Length); // actually writing the data to arduino
+                sp.Close();
+            }
+            catch 
+            { 
+
+            }
             sp.Close();
             Application.LoadLevel("Pause");
             
@@ -387,6 +398,17 @@ public class movimento : MonoBehaviour {
 
         if (Input.GetKeyDown("escape")) // to go to main menu
         {
+            try
+            {
+                int duinoClose = 105;
+                byte[] data = new byte[] { (byte)duinoClose }; // converts unity position to a bit array to be sent throug the serial port "sp"
+                sp.Write(data, 0, data.Length); // actually writing the data to arduino
+                sp.Close();
+            }
+            catch
+            {
+
+            }
             sp.Close();
             Application.LoadLevel("Menu");
             
