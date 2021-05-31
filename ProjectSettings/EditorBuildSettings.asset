@@ -17,4 +17,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/squares_welft.unity
     guid: 1829f0e937e4c482e84434f75d086f2e
+  - enabled: 1
+    path: Assets/PracticeScene.unity
+    guid: 8fa814f33993b2042bf60f5304c470af
+  - enabled: 1
+    path: Assets/TestScene2.unity
+    guid: 6153094a1813225479fd5604236db225
   m_configObjects: {}

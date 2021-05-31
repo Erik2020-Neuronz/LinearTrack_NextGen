@@ -8,7 +8,12 @@ public class FrameController : MonoBehaviour
     void Start()
     {
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 100; 
+        float framerateFloat = PlayerPrefs.GetFloat("Period");
+        int framerate = (int) Mathf.Round(1 / framerateFloat);
+        //Debug.Log(framerateFloat);
+        //Debug.Log(framerate);
+        Application.targetFrameRate = framerate; 
+
         
     }
 

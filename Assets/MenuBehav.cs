@@ -47,6 +47,8 @@ public class MenuBehav : MonoBehaviour
 
     public Text lapCounterText;
 
+    public Dropdown mazeDropdown;
+
     void Start()
     {
         Cursor.visible = true;
@@ -64,7 +66,7 @@ public class MenuBehav : MonoBehaviour
         //setting default menu values based on previous prefs
 
         inputField_Port.GetComponent<InputField>().text = PlayerPrefs.GetString("Port");
-        
+
         inputField_Gain.GetComponent<InputField>().text = PlayerPrefs.GetFloat("Gain").ToString();
 
         inputField_Period.GetComponent<InputField>().text = PlayerPrefs.GetFloat("Period").ToString();
@@ -74,8 +76,8 @@ public class MenuBehav : MonoBehaviour
         inputField_FileName.GetComponent<InputField>().text = PlayerPrefs.GetString("FileName");
 
         lapCounterText.text = "Laps Completed: " + PlayerPrefs.GetInt("lapCounter");
-        
-        Debug.Log(PlayerPrefs.GetInt("lapCounter"));
+
+        //Debug.Log(PlayerPrefs.GetInt("lapCounter"));
 
         // sets the scroll on or off based on previous preferences
         // toggles -----------------------------------------------------------------------------------
@@ -113,7 +115,7 @@ public class MenuBehav : MonoBehaviour
 
         // different parts of the menu are instantiated and enabled
 
-        Button additOpt = additionalOptions.GetComponent<Button>(); 
+        Button additOpt = additionalOptions.GetComponent<Button>();
         additOpt.onClick.AddListener(TaskOnAdditOptClick);
 
         Button b2menu = back2Menu.GetComponent<Button>();
@@ -123,6 +125,9 @@ public class MenuBehav : MonoBehaviour
         m_MainCamera = Camera.main;
         m_MainCamera.enabled = true;
         m_CameraTwo.enabled = false;
+
+        mazeDropdown.GetComponent<Dropdown>().value = PlayerPrefs.GetInt("MazeDropIndex");
+
     }
 
     void TaskOnAdditOptClick() // these functions are used to toggle between the two menus
@@ -158,7 +163,11 @@ public class MenuBehav : MonoBehaviour
         fileName = inputFileName.GetComponent<Text>().text;
         PlayerPrefs.SetString("FileName", fileName);
 
-        mazeChoice = "squares_welft";
+        int mazeDropIndex = mazeDropdown.GetComponent<Dropdown>().value;
+        PlayerPrefs.SetInt("MazeDropIndex", mazeDropIndex);
+        Text mazeChoiceText = mazeDropdown.GetComponent<Dropdown>().captionText;
+        string mazeChoice = mazeChoiceText.text;
+        //Debug.Log(mazeChoice);
         PlayerPrefs.SetString("Maze", mazeChoice);
         //---------------------------------------------------------------
         // saves the values input by the user into preferences

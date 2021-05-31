@@ -38,6 +38,7 @@ public class movimento : MonoBehaviour {
     private bool isScrollOn; //checks if the scroll wheel option is on (1) or off (0)
     private bool isUnroundOn; //checks if the unrounded position (text) option is on (1) or off (0)
     private bool isLoopCountOn; //checks if the loop counter option is on (1) or off (0)
+    private bool isPathErrorLogged = false; //to log path error only once in the debugger
     private int didLapComplete = 0; // boolean to determine the lap has completed. Used in conditional to update lap counter
     private int listCounter = 0;//counts the number of data points in the text file list. 
     
@@ -125,9 +126,12 @@ public class movimento : MonoBehaviour {
         speed_factor = PlayerPrefs.GetFloat("Gain", 0.9f);
         period = PlayerPrefs.GetFloat("period", 0.01f);
         Time.fixedDeltaTime = period;
+        //********************************
+        //path = PlayerPrefs.GetString("FilePath", "C:/Users/EnglishLab WS3/Documents/Test2") + "/" + PlayerPrefs.GetString("FileName", "PleaseWork.txt") + ".txt";
+        //CreateText(ref path); // was previously an empty void 2_16_21
 
-        path = PlayerPrefs.GetString("FilePath", "C:/Users/EnglishLab WS3/Documents/Test2") + "/" + PlayerPrefs.GetString("FileName", "PleaseWork.txt") + ".txt";
-        CreateText(ref path); // was previously an empty void 2_16_21
+        path = PlayerPrefs.GetString("RefPath");
+        Debug.Log(path);
 
         if (PlayerPrefs.GetInt("posUnround") == 1) //checks if the unround toggle is active
         {
@@ -335,42 +339,55 @@ public class movimento : MonoBehaviour {
         // stores data in a list until the "listCounter" number of recordings has been made
 
         newPath = "C:/Users/Erik/Documents/TestFolder/streamTester.txt"; // I think this was only for testing and no longer does anything
-        
-        ts.Add(content); // remember that the text data is added to a list before being written to file. This list acts as a buffer
+
+        try
+        {
+            ts.Add(content); // remember that the text data is added to a list before being written to file. This list acts as a buffer
 
 
-        listCounter = listCounter + 1; // counts the number of elements in the list
+            listCounter = listCounter + 1; // counts the number of elements in the list
 
-        if(listCounter == 99) // once there are 100 elements, they are all written to file in 1 frame
+            if (listCounter == 99) // once there are 100 elements, they are all written to file in 1 frame
+            {
+
+
+                using (FileStream tw = File.Open(path, FileMode.Append)) //appends file referenced in "path"
+                {
+                    foreach (string strData in ts)
+                    {
+
+                        byte[] info = new UTF8Encoding(true).GetBytes(strData); //converts the string to a bit array
+                        tw.Write(info, 0, info.Length); //the text file is finally written 
+                    }
+                }
+
+                listCounter = 0;
+                ts.Clear();
+            }
+        }
+        catch
         {
 
-                   
-            using (FileStream tw = File.Open(path, FileMode.Append)) //appends file referenced in "path"
+            if (isPathErrorLogged == false)
             {
-                foreach (string strData in ts)
-                {
-                    
-                    byte[] info = new UTF8Encoding(true).GetBytes(strData); //converts the string to a bit array
-                    tw.Write(info, 0, info.Length); //the text file is finally written 
-                }
+                Debug.Log("Invalid Path");
+                isPathErrorLogged = true;
             }
-                        
-            listCounter = 0;
-            ts.Clear();
         }
-
 
         //-----------------------------------------------------------------------------
         //maze exit 
 
         if (Input.GetKeyDown("space")) // to go to pause screen
         {
+            sp.Close();
             Application.LoadLevel("Pause");
             
         }
 
         if (Input.GetKeyDown("escape")) // to go to main menu
         {
+            sp.Close();
             Application.LoadLevel("Menu");
             
         }
