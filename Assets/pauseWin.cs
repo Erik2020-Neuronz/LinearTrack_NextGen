@@ -21,6 +21,7 @@ public class pauseWin : MonoBehaviour
 
     private IEnumerator lvlLoadCoroutine;
     private bool isSceneLoaded = false;
+    private bool isWriteFileOn;
     public Text m_Text;
     public string path; //the text file path
 
@@ -32,6 +33,16 @@ public class pauseWin : MonoBehaviour
         lvlLoadCoroutine = LoadScene(PlayerPrefs.GetString("Maze", "squares_welft"));
 
         StartCoroutine(lvlLoadCoroutine);
+
+        if (PlayerPrefs.GetInt("writeFile") == 1) //checks if the write file toggle is active
+        {
+            isWriteFileOn = true;
+        }
+        else if (PlayerPrefs.GetInt("writeFile") == 0)
+        {
+            isWriteFileOn = false;
+        }
+
 
 
         //StopCoroutine(AsynchronousLoad(PlayerPrefs.GetString("Maze", "squares_welft")));
@@ -74,9 +85,12 @@ public class pauseWin : MonoBehaviour
                 {    //Activate the Scene
                     try
                     {
-                        path = PlayerPrefs.GetString("FilePath", "C:/Users/EnglishLab WS3/Documents/Test2") + "/" + PlayerPrefs.GetString("FileName", "PleaseWork.txt") + ".txt";
-                        CreateText(ref path); // was previously an empty void 2_16_21
-                        PlayerPrefs.SetString("RefPath", path);
+                        if (isWriteFileOn)
+                        {
+                            path = PlayerPrefs.GetString("FilePath", "C:/Users/EnglishLab WS3/Documents/Test2") + "/" + PlayerPrefs.GetString("FileName", "PleaseWork.txt") + ".txt";
+                            CreateText(ref path); // was previously an empty void 2_16_21
+                            PlayerPrefs.SetString("RefPath", path);
+                        }
                     }
                     catch
                     {

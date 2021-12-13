@@ -38,6 +38,7 @@ public class movimento : MonoBehaviour {
     private bool isScrollOn; //checks if the scroll wheel option is on (1) or off (0)
     private bool isUnroundOn; //checks if the unrounded position (text) option is on (1) or off (0)
     private bool isLoopCountOn; //checks if the loop counter option is on (1) or off (0)
+    private bool isWriteFileOn; // checsk if the write file option is on (1) or off(0)
     private bool isPathErrorLogged = false; //to log path error only once in the debugger
     private int didLapComplete = 0; // boolean to determine the lap has completed. Used in conditional to update lap counter
     private int listCounter = 0;//counts the number of data points in the text file list. 
@@ -133,7 +134,7 @@ public class movimento : MonoBehaviour {
         path = PlayerPrefs.GetString("RefPath");
         Debug.Log(path);
 
-        if (PlayerPrefs.GetInt("posUnround") == 1) //checks if the unround toggle is active
+        if (PlayerPrefs.GetInt("posUnround") == 1) //checks if the loop count toggle is active
         {
             isUnroundOn = true;
         }
@@ -142,7 +143,7 @@ public class movimento : MonoBehaviour {
             isUnroundOn = false;
         }
 
-        if (PlayerPrefs.GetInt("loopCount") == 1) //checks if the unround toggle is active
+        if (PlayerPrefs.GetInt("loopCount") == 1) //checks if the loop count toggle is active
         {
             isLoopCountOn = true;
         }
@@ -150,6 +151,17 @@ public class movimento : MonoBehaviour {
         {
             isLoopCountOn = false;
         }
+
+        if (PlayerPrefs.GetInt("writeFile") == 1) //checks if the write file toggle is active
+        {
+            isWriteFileOn = true;
+        }
+        else if (PlayerPrefs.GetInt("writeFile") == 0)
+        {
+            isWriteFileOn = false;
+        }
+
+
 
         //-----------------------------------------------------------------------------
         // creates a list to be used later 
@@ -339,42 +351,43 @@ public class movimento : MonoBehaviour {
         // stores data in a list until the "listCounter" number of recordings has been made
 
         newPath = "C:/Users/Erik/Documents/TestFolder/streamTester.txt"; // I think this was only for testing and no longer does anything
-
-        try
+        if (isWriteFileOn)
         {
-            ts.Add(content); // remember that the text data is added to a list before being written to file. This list acts as a buffer
-
-
-            listCounter = listCounter + 1; // counts the number of elements in the list
-
-            if (listCounter == 99) // once there are 100 elements, they are all written to file in 1 frame
+            try
             {
+                ts.Add(content); // remember that the text data is added to a list before being written to file. This list acts as a buffer
 
 
-                using (FileStream tw = File.Open(path, FileMode.Append)) //appends file referenced in "path"
+                listCounter = listCounter + 1; // counts the number of elements in the list
+
+                if (listCounter == 99) // once there are 100 elements, they are all written to file in 1 frame
                 {
-                    foreach (string strData in ts)
+
+
+                    using (FileStream tw = File.Open(path, FileMode.Append)) //appends file referenced in "path"
                     {
+                        foreach (string strData in ts)
+                        {
 
-                        byte[] info = new UTF8Encoding(true).GetBytes(strData); //converts the string to a bit array
-                        tw.Write(info, 0, info.Length); //the text file is finally written 
+                            byte[] info = new UTF8Encoding(true).GetBytes(strData); //converts the string to a bit array
+                            tw.Write(info, 0, info.Length); //the text file is finally written 
+                        }
                     }
+
+                    listCounter = 0;
+                    ts.Clear();
                 }
-
-                listCounter = 0;
-                ts.Clear();
             }
-        }
-        catch
-        {
-
-            if (isPathErrorLogged == false)
+            catch
             {
-                Debug.Log("Invalid Path");
-                isPathErrorLogged = true;
+
+                if (isPathErrorLogged == false)
+                {
+                    Debug.Log("Invalid Path");
+                    isPathErrorLogged = true;
+                }
             }
         }
-
         //-----------------------------------------------------------------------------
         //maze exit 
 

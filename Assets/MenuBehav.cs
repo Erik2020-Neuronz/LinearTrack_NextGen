@@ -15,7 +15,8 @@ public class MenuBehav : MonoBehaviour
     //because of how PlayerPrefs works
     public int turnUnroundPosOn;
     public int turnLoopCountOn;
-     
+    public int turnWriteFileOn;
+
 
     //The way Valero setup, these game objects are used to reference the text object
     //that is attacehd to each input field
@@ -41,6 +42,7 @@ public class MenuBehav : MonoBehaviour
     public Toggle scrollToggle; //for toggling scroll wheel
     public Toggle posUnroundToggle; //for toggling if position readout to text will be rounded
     public Toggle loopCountToggle;
+    public Toggle writeFileToggle;
 
     public Button additionalOptions;
     public Button back2Menu;
@@ -111,6 +113,15 @@ public class MenuBehav : MonoBehaviour
         else if ((PlayerPrefs.GetInt("loopCount")) == 0)
         {
             loopCountToggle.isOn = false;
+        }
+        if (PlayerPrefs.GetInt("writeFile") == 1)
+        {
+            writeFileToggle.isOn = true;
+
+        }
+        else if ((PlayerPrefs.GetInt("writeFile")) == 0)
+        {
+            writeFileToggle.isOn = false;
         }
 
         // different parts of the menu are instantiated and enabled
@@ -206,6 +217,18 @@ public class MenuBehav : MonoBehaviour
         {
             turnLoopCountOn = 0;
             PlayerPrefs.SetInt("loopCount", turnLoopCountOn);
+        }
+
+        if (writeFileToggle.isOn == true)
+        {
+            turnWriteFileOn = 1;
+            PlayerPrefs.SetInt("writeFile", turnWriteFileOn);
+        }
+
+        if (writeFileToggle.isOn == false)
+        {
+            turnWriteFileOn = 0;
+            PlayerPrefs.SetInt("writeFile", turnWriteFileOn);
         }
 
 
